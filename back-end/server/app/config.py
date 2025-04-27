@@ -2,7 +2,7 @@ from datetime import timedelta
 import os
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(dotenv_path="../../../.env")
 
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
