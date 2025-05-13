@@ -19,11 +19,13 @@ function MainApp() {
 
 	return (
 		<ChatProvider>
-			<Header />
-			<div className="flex h-screen">
-				<ConversationListPanel />
-				<ChatPanel />
-				<WorkspacePanel />
+			<div className="flex flex-col h-screen overflow-hidden font-sans">
+				<Header />
+				<div className="flex flex-1 overflow-hidden">
+					<ConversationListPanel />
+					<ChatPanel />
+					<WorkspacePanel />
+				</div>
 			</div>
 		</ChatProvider>
 	);

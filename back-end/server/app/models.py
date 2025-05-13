@@ -17,7 +17,9 @@ class Conversation(db.Model):
         nullable=False,
         default="gathering"
     )
-    user = db.relationship("User", back_populates="conversations")
+    title = db.Column(db.String(64), nullable=True)
+    user = db.relationship(
+        "User", back_populates="conversations")
     messages = db.relationship("Message",
                                back_populates="conversation",
                                cascade="all, delete-orphan")
@@ -55,6 +57,7 @@ class Sequence(db.Model):
 
     conversation = db.relationship("Conversation", back_populates="sequences")
 
+
 class SequenceSteps(db.Model):
     __tablename__ = "sequence_steps"
     id = db.Column(db.Integer, primary_key=True)
@@ -67,6 +70,7 @@ class SequenceSteps(db.Model):
     step_text = db.Column(db.Text, nullable=False)
     step_number = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now(tz=timezone.utc))
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -82,7 +86,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now(tz=timezone.utc))
 
     conversations = db.relationship("Conversation", back_populates="user")
-    
+
     def to_dict(self):
         return {
             "id": self.id,

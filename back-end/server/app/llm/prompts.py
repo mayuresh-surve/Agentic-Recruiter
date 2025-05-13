@@ -32,3 +32,6 @@ UPDATE_SEQUENCE_PROMPT = (
     "If user mentioned to edit a specific step only edit that step and keep rest of the steps same. \n"
     "If you feel that anything is missing you user best knowledge from the industry to generate the plan."
 )
+
+CREATE_CONVERSATION_TITLE = (
+    "Based on the following user message, generate a concise and descriptive title (3-5 words) for this new conversation:")

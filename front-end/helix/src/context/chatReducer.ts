@@ -5,21 +5,30 @@ export interface Message {
 	conversationId: string;
 }
 
+export interface Conversation {
+	id: string;
+	name: string;
+}
+
 export interface ChatState {
-	conversations: { id: string; name: string }[];
+	conversations: Conversation[];
 	currentConversationId: string | null;
 	messages: Message[];
 	sequence: string[];
 }
 
 export type ChatAction =
-	| { type: "SET_CONVERSATIONS"; payload: { id: string; name: string }[] }
-	| { type: "ADD_CONVERSATION"; payload: { id: string; name: string } }
+	| { type: "SET_CONVERSATIONS"; payload: Conversation[] }
+	| { type: "ADD_CONVERSATION"; payload: Conversation }
 	| { type: "SET_CURRENT_CONVERSATION"; payload: string }
 	| { type: "SET_MESSAGES"; payload: Message[] }
 	| { type: "ADD_MESSAGE"; payload: Message }
 	| { type: "SET_SEQUENCE"; payload: string[] }
-	| { type: "DELETE_MESSAGE" };
+	| { type: "DELETE_MESSAGE" }
+	| {
+			type: "UPDATE_CONVERSATION_TITLE";
+			payload: { conversationId: string; title: string };
+	  };
 
 export const initialState: ChatState = {
 	conversations: [],
@@ -33,6 +42,9 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
 		case "SET_CONVERSATIONS":
 			return { ...state, conversations: action.payload };
 		case "ADD_CONVERSATION":
+			if (state.conversations.find((c) => c.id === action.payload.id)) {
+				return state;
+			}
 			return {
 				...state,
 				conversations: [...state.conversations, action.payload],
@@ -52,7 +64,9 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
 		case "DELETE_MESSAGE":
 			return {
 				...state,
-				messages: state.messages.filter( (message) => message.text !== "Thinking..."),
+				messages: state.messages.filter(
+					(message) => message.text !== "Thinking..."
+				),
 			};
 		case "SET_MESSAGES":
 			return {
@@ -63,6 +77,15 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
 			return {
 				...state,
 				sequence: action.payload,
+			};
+		case "UPDATE_CONVERSATION_TITLE":
+			return {
+				...state,
+				conversations: state.conversations.map((conversation) =>
+					conversation.id === action.payload.conversationId
+						? { ...conversation, name: action.payload.title }
+						: conversation
+				),
 			};
 		default:
 			return state;

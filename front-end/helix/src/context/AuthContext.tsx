@@ -14,6 +14,7 @@ export interface User {
 	role?: string;
 	industry?: string;
 	roles_hire?: string;
+	avatarUrl?: string;
 }
 
 interface AuthContextType {

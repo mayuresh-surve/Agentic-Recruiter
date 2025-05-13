@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useReducer, useEffect, ReactNode } from "react";
-import { chatReducer, initialState, Message } from "./chatReducer";
+import { chatReducer, initialState, Message, Conversation } from "./chatReducer";
 import useSocket from "../hooks/useSocket";
 
 interface ChatContextType {
@@ -25,24 +25,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		socket.emit("get_conversations");
 
 		//conversation list fetched
-		socket.on("conversation_list", (list: { id: string; name: string }[]) =>
+		socket.on("conversation_list", (list: Conversation[]) =>
 			dispatch({ type: "SET_CONVERSATIONS", payload: list })
 		);
 
 		// new conversation created
 		socket.on(
 			"conversation_created",
-			({ id, name }: { id: string; name: string }) => {
+			(conversationData: Conversation) => {
 				dispatch({
 					type: "ADD_CONVERSATION",
-					payload: { id, name },
+					payload: conversationData,
 				});
-				dispatch({ type: "SET_CURRENT_CONVERSATION", payload: id });
+				dispatch({ type: "SET_CURRENT_CONVERSATION", payload: conversationData.id });
 			}
 		);
 
 		//Fetch conversation messages
-		socket.on("conversation_messages", ({ messages }: { messages: [] }) => {
+		socket.on("conversation_messages", ({ messages }: { messages: Message[] }) => {
 			dispatch({ type: "SET_MESSAGES", payload: messages });
 		});
 
@@ -77,11 +77,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 			}
 		);
 
+		socket.on(
+			"conversation_title_updated",
+			(data: { conversationId: string; title: string }) => {
+				dispatch({
+					type: "UPDATE_CONVERSATION_TITLE",
+					payload: {
+						conversationId: data.conversationId,
+						title: data.title,
+					},
+				});
+			}
+		);
+
 		return () => {
 			socket.off("conversation_list");
 			socket.off("conversation_messages");
 			socket.off("bot_message");
-			socket.off("loading_state");
+			socket.off("conversation_title_updated");
 			socket.off("sequence_retrieved");
 			socket.off("conversation_created");
 		};
@@ -98,7 +111,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	};
 
 	const sendMessage = (text: string) => {
-		if (!state.currentConversationId) return;
+		if (!state.currentConversationId) {
+			console.warn(
+				"Cannot send message, no current conversation selected."
+			);
+			return;
+		}
+
+		const messagesForCurrentConv = state.messages.filter(
+			(m) => m.conversationId === state.currentConversationId
+		);
+		const isFirstMessage = messagesForCurrentConv.length === 0;
+		
+		if (isFirstMessage) {
+			socket?.emit("update_conversation_title", {
+				conversationId: state.currentConversationId,
+				message: text
+			});
+		}
+		
 		const msg = {
 			id: Date.now(),
 			from: "user" as const,
@@ -112,12 +143,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		dispatch({
 			type: "ADD_MESSAGE",
 			payload: {
-				id: Date.now(),
+				id: Date.now() + 1,
 				from: "bot" as const,
 				text: "Thinking...",
 				conversationId: state.currentConversationId,
 			} as Message,
 		});
+		
 		socket?.emit("user_message", msg);
 	};
 

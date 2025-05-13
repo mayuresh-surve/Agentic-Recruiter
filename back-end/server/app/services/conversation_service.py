@@ -15,8 +15,8 @@ def get_user_conversations(user_id: int) -> List[Dict]:
         .all()
     )
     return [
-        {"id": str(conv.id), "name": f"Conversation {conv.id}"}
-        for conv in convs
+        {"id": str(conv.id), "name": conv.title if conv.title else f"Conversation {i + 1}"}
+        for i, conv in enumerate(convs)
     ]
 
 def create_conversation(user_id: int) -> Conversation:
@@ -27,6 +27,23 @@ def create_conversation(user_id: int) -> Conversation:
     db.session.add(conv)
     db.session.commit()
     return conv
+
+def get_conversation(conversation_id: int) -> Conversation:
+    """
+    Return a Conversation object for a given conversation_id.
+    """
+    return Conversation.query.get(conversation_id)
+
+def update_conversation_title(conversation_id: int, title: str) -> None:
+    """
+    Update the title of a conversation.
+    """
+    conversation = get_conversation(conversation_id)
+    if conversation:
+        conversation.title = title
+        db.session.commit()
+    else:
+        raise ValueError("Conversation not found")
 
 def get_conversation_messages(conversation_id: int) -> List[Dict]:
     """

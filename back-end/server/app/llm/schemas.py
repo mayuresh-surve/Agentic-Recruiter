@@ -13,3 +13,6 @@ class Step(BaseModel):
 class SequenceResponse(BaseModel):
     description: str = Field(..., description="What is this sequence about?")
     steps: list[Step]
+
+class ConversationTitle(BaseModel):
+    title: str = Field(..., description="Title of the conversation")
