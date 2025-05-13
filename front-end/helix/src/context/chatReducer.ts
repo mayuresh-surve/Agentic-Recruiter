@@ -18,7 +18,8 @@ export type ChatAction =
 	| { type: "SET_CURRENT_CONVERSATION"; payload: string }
 	| { type: "SET_MESSAGES"; payload: Message[] }
 	| { type: "ADD_MESSAGE"; payload: Message }
-	| { type: "SET_SEQUENCE"; payload: string[] };
+	| { type: "SET_SEQUENCE"; payload: string[] }
+	| { type: "DELETE_MESSAGE" };
 
 export const initialState: ChatState = {
 	conversations: [],
@@ -47,6 +48,11 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
 			return {
 				...state,
 				messages: [...state.messages, action.payload],
+			};
+		case "DELETE_MESSAGE":
+			return {
+				...state,
+				messages: state.messages.filter( (message) => message.text !== "Thinking..."),
 			};
 		case "SET_MESSAGES":
 			return {

@@ -21,12 +21,13 @@ def handle_user_message(data):
     if not conv_id or text is None:
         return emit("error", {"msg": "Invalid payload for user_message"})
 
+    emit("loading_state", {"text": "Thinking...", "conversationId": conv_id})
+    
     try:
         save_message(int(conv_id), text, "user")
     except Exception as e:
         current_app.logger.error(f"DB error saving user message: {e}")
         return emit("error", {"msg": "Failed to save user message"})
-
     
     history = get_history(conv_id)
     messages = []
@@ -54,7 +55,8 @@ def handle_user_message(data):
         sequence_messages = [{
             "role": "user", "content": response_message.next_step + "\nInformation available for you to work on the task:\n" + response_message.information_gathered
         }]
-        
+        emit("loading_state", {
+             "text": "Creating a Sequence...", "conversationId": conv_id})
         try:
             sequence_response = ask_llm(
                 sequence_messages, output_format=SequenceResponse, instructions=SEQUENCE_GENERATOR_PROMPT, temperature=0.5)
@@ -96,7 +98,8 @@ def handle_user_message(data):
         sequence_update_messages = [
             {"role": "user", "content": f"{response_message.next_step} \n\n Current plan:\n{existing_sequence_text}"},
         ]
-        
+        emit("loading_state", {
+             "text": "Updating a Sequence...", "conversationId": conv_id})
         try:
             seq_resp = ask_llm(
                 sequence_update_messages,

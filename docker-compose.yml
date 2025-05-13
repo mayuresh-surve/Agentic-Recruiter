@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Frontend Service (React App)
+  frontend:
+    build:
+      context: ./front-end/helix # Path to the frontend directory
+      dockerfile: Dockerfile.dev # Specify the Dockerfile name
+    container_name: react_frontend_dev
+    ports:
+      - "5173:5173" # Map host port 5173 to container port 5173 (Vite default)
+    volumes:
+      # Mount the frontend source code for live updates (Hot Module Replacement)
+      # Note: node_modules are handled inside the container build process
+      - ./front-end/helix:/app
+      # Exclude node_modules from being overwritten by the volume mount
+      - /app/node_modules
+    # Keep stdin open, and allocate a pseudo-TTY, useful for interactive processes like Vite
+    stdin_open: true
+    tty: true
+    environment:
+      # Ensure Vite's HMR works correctly within Docker
+      - CHOKIDAR_USEPOLLING=true
+      # Define the backend URL for the frontend to connect to
+      # Adjust the hostname ('backend') and port ('5000') if needed
+      - VITE_API_BASE_URL=http://backend:5001
+    depends_on:
+      - backend # Optional: Ensures backend starts before frontend attempts connection
+
+  # Backend Service (Flask App)
+  backend:
+    build:
+      context: ./back-end/server # Path to the backend directory
+      dockerfile: Dockerfile.dev # Specify the Dockerfile name
+    container_name: flask_backend_dev
+    ports:
+      - "5001:5001" 
+    volumes:
+      # Mount the backend source code for live updates/reloading
+      - ./back-end/server:/app
+    env_file:
+      # Load environment variables from a file
+      - .env

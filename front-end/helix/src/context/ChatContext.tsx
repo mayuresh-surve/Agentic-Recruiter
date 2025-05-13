@@ -57,6 +57,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 				conversationId: string;
 			}) => {
 				dispatch({
+					type: "DELETE_MESSAGE",})
+				dispatch({
 					type: "ADD_MESSAGE",
 					payload: {
 						id: Date.now(),
@@ -79,6 +81,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 			socket.off("conversation_list");
 			socket.off("conversation_messages");
 			socket.off("bot_message");
+			socket.off("loading_state");
 			socket.off("sequence_retrieved");
 			socket.off("conversation_created");
 		};
@@ -91,7 +94,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	const selectConversation = (id: string) => {
 		dispatch({ type: "SET_CURRENT_CONVERSATION", payload: id });
 		socket?.emit("select_conversation", { conversationId: id });
-		socket?.emit("get_sequences", {conversationId: id});
+		socket?.emit("get_sequences", { conversationId: id });
 	};
 
 	const sendMessage = (text: string) => {
@@ -105,6 +108,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		dispatch({
 			type: "ADD_MESSAGE",
 			payload: msg,
+		});
+		dispatch({
+			type: "ADD_MESSAGE",
+			payload: {
+				id: Date.now(),
+				from: "bot" as const,
+				text: "Thinking...",
+				conversationId: state.currentConversationId,
+			} as Message,
 		});
 		socket?.emit("user_message", msg);
 	};
