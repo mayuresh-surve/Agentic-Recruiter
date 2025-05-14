@@ -71,7 +71,7 @@ Follow these steps to get Rune up and running on your local machine:
 
         ```bash
         docker run -d \
-          --name renu-postgres \
+          --name rune-postgres \
           -e POSTGRES_USER=your_db_user \
           -e POSTGRES_PASSWORD=your_db_password \
           -e POSTGRES_DB=your_db_name \
@@ -79,17 +79,17 @@ Follow these steps to get Rune up and running on your local machine:
           postgres:15-alpine
         ```
         * `-d`: Runs the container in detached mode.
-        * `--name renu-postgres`: Assigns a name to the container for easier management.
+        * `--name rune-postgres`: Assigns a name to the container for easier management.
         * `-e POSTGRES_USER=...`: Sets the PostgreSQL superuser.
         * `-e POSTGRES_PASSWORD=...`: Sets the password for the superuser.
         * `-e POSTGRES_DB=...`: Creates a database with this name, owned by the user.
         * `-p 5432:5432`: Maps port 5432 on your host to port 5432 in the container.
         * `postgres:15-alpine`: Specifies the Docker image to use.
 
-    * **To stop the container:** `docker stop renu-postgres`
-    * **To start the container again:** `docker start renu-postgres`
-    * **To view logs:** `docker logs renu-postgres`
-    * **To remove the container (data will be lost unless you set up persistent volumes):** `docker rm renu-postgres`
+    * **To stop the container:** `docker stop rune-postgres`
+    * **To start the container again:** `docker start rune-postgres`
+    * **To view logs:** `docker logs rune-postgres`
+    * **To remove the container (data will be lost unless you set up persistent volumes):** `docker rm rune-postgres`
 
 3.  **Set up Environment Variables for Rune Application:**
     The Rune application (specifically the backend) needs to connect to the PostgreSQL database you just started and also requires an OpenAI API key.
@@ -109,8 +109,8 @@ Follow these steps to get Rune up and running on your local machine:
     #   'host.docker.internal' is generally the most reliable for connecting from a container to a service on the host.
     DATABASE_URL=postgresql://your_db_user:your_db_password@host.docker.internal:5432/your_db_name
 
-    # Example using 'renu_pg_user', 'securepassword123', 'renudb':
-    # DATABASE_URL=postgresql://renu_pg_user:securepassword123@host.docker.internal:5432/renudb
+    # Example using 'rune_pg_user', 'securepassword123', 'runedb':
+    # DATABASE_URL=postgresql://rune_pg_user:securepassword123@host.docker.internal:5432/runedb
 
     # Add any other environment variables required by your frontend or backend
     # e.g., FLASK_APP=your_app.py, FLASK_DEBUG=True, etc. for the backend
@@ -118,7 +118,7 @@ Follow these steps to get Rune up and running on your local machine:
     ```
     **Important:**
     * Replace `your_openai_api_key_here` with your actual OpenAI API key.
-    * Replace `your_db_user`, `your_db_password`, and `your_db_name` in the `DATABASE_URL` with the exact same values you used when starting the `renu-postgres` container.
+    * Replace `your_db_user`, `your_db_password`, and `your_db_name` in the `DATABASE_URL` with the exact same values you used when starting the `rune-postgres` container.
     * The hostname in `DATABASE_URL` (`host.docker.internal`) is crucial for allowing the Dockerized backend service to connect to the PostgreSQL container running on your host machine. If you encounter issues, you might need to adjust this based on your specific Docker networking setup (especially on Linux).
 
 4.  **Build and Start the Rune Application Services with Docker Compose:**
@@ -149,10 +149,10 @@ The following environment variables are used by the application:
 ## Troubleshooting
 
 * **Database Connection Issues:**
-    * Ensure your `renu-postgres` container is running (`docker ps`).
-    * Double-check that the `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` in your `DATABASE_URL` environment variable exactly match those used when starting the `renu-postgres` container.
+    * Ensure your `rune-postgres` container is running (`docker ps`).
+    * Double-check that the `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` in your `DATABASE_URL` environment variable exactly match those used when starting the `rune-postgres` container.
     * Verify the hostname and port in `DATABASE_URL`. `host.docker.internal:5432` is common for Docker Desktop. On Linux, if `host.docker.internal` doesn't work, try the IP address of your `docker0` bridge (often `172.17.0.1`) or ensure your Docker Compose services and the standalone Postgres container are on a shared custom Docker network.
-    * Check the logs of your backend service (`docker-compose logs <backend-service-name>`) and the `renu-postgres` container (`docker logs renu-postgres`) for specific error messages.
+    * Check the logs of your backend service (`docker-compose logs <backend-service-name>`) and the `rune-postgres` container (`docker logs rune-postgres`) for specific error messages.
 
 
 ## License
